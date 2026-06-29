@@ -400,7 +400,28 @@ document.querySelectorAll(".scroll-fade").forEach(section => {
     });
 });
 
-// Dynamic hover mouse coordinates tracking on cards for interactive glow gradient
+// ----------------------------------------------------
+// 11. Back to Top Button
+// ----------------------------------------------------
+const backToTopBtn = document.getElementById("back-to-top");
+
+if (backToTopBtn) {
+    window.addEventListener("scroll", () => {
+        if (window.scrollY > 400) {
+            backToTopBtn.classList.add("show");
+        } else {
+            backToTopBtn.classList.remove("show");
+        }
+    });
+
+    backToTopBtn.addEventListener("click", () => {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+}
+
+// ----------------------------------------------------
+// 12. Dynamic hover mouse coordinates tracking on cards for interactive glow gradient
+// ----------------------------------------------------
 document.querySelectorAll(".research-card, .teaching-card, .reference-card, .stat-card").forEach(card => {
     card.addEventListener("mousemove", e => {
         const rect = card.getBoundingClientRect();

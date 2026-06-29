@@ -22,12 +22,13 @@
     /* cyan */
     --secondary-rgb: 6, 182, 212;
     --accent: #d946ef;
+    --accent-hover: #c026d3;
     /* fuchsia */
 
     --grade-aplus: linear-gradient(135deg, #10b981, #059669);
     --grade-a: linear-gradient(135deg, #34d399, #10b981);
     --grade-aminus: linear-gradient(135deg, #059669, #0f766e);
-    --grade-bplus: linear-gradient(135deg, #3b82f6, #1d4ed8);
+    --grade-bplus: linear-gradient(135deg, #34d399, #059669);
     --grade-b: linear-gradient(135deg, #60a5fa, #3b82f6);
 
     --shadow-main: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
@@ -58,11 +59,12 @@ body.light {
     /* teal */
     --secondary-rgb: 13, 148, 136;
     --accent: #c084fc;
+    --accent-hover: #a855f7;
 
     --grade-aplus: linear-gradient(135deg, #059669, #047857);
     --grade-a: linear-gradient(135deg, #10b981, #059669);
     --grade-aminus: linear-gradient(135deg, #0d9488, #115e59);
-    --grade-bplus: linear-gradient(135deg, #1d4ed8, #1e3a8a);
+    --grade-bplus: linear-gradient(135deg, #10b981, #047857);
     --grade-b: linear-gradient(135deg, #2563eb, #1d4ed8);
 
     --shadow-main: 0 10px 30px -10px rgba(15, 23, 42, 0.08);
@@ -1051,6 +1053,7 @@ section {
     background: rgba(99, 102, 241, 0.08);
     padding: 0.2rem 0.5rem;
     border-radius: 4px;
+    white-space: nowrap;
 }
 
 .teaching-desc {
@@ -1770,4 +1773,50 @@ body.light nav.scrolled {
 
 .research-card:hover::after, .teaching-card:hover::after, .reference-card:hover::after, .stat-card:hover::after {
     opacity: 1;
+}
+
+/* Back to Top Button */
+#back-to-top {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(20px);
+    transition: opacity 0.3s, visibility 0.3s, transform 0.3s, background 0.3s;
+    z-index: 999;
+    box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+}
+
+#back-to-top.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+#back-to-top:hover {
+    background: var(--accent-hover);
+    box-shadow: 0 6px 20px rgba(99, 102, 241, 0.6);
+    transform: translateY(-3px);
+}
+
+#back-to-top:active {
+    transform: translateY(0);
+}
+
+#back-to-top.show:hover {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(-3px);
 }
