@@ -433,15 +433,20 @@ document.querySelectorAll(".research-card, .teaching-card, .reference-card, .sta
 });
 
 // ----------------------------------------------------
-// 13. Feedback Image Gallery (Static)
+// 13. Feedback & Memories Image Galleries (Static)
 // ----------------------------------------------------
-// 1. Place your screenshot files in assets/feedbacks/{folder}/
-// 2. Add the filenames to the array below
-// 3. Supported formats: .jpg, .jpeg, .png, .gif, .webp
+// Place your image files in assets/feedbacks/{folder}/ or assets/memories/{folder}/
+// then add the filenames to the arrays below. Supported: .jpg, .jpeg, .png, .gif, .webp
 const FEEDBACK_IMAGES = {
-    gism:     [],       // e.g. ["feedback1.jpg", "feedback2.png"]
-    colombo:  ["01.png","02.png","03.png","04.png","05.png","06.png","07.png","08.png","09.png"],       // e.g. ["img001.jpg"]
-    usj:      []        // e.g. ["screenshot1.jpg", "screenshot2.jpg"]
+    gism:     [],
+    colombo:  ["01.png","02.png","03.png","04.png","05.png","06.png","07.png","08.png","09.png"],
+    usj:      []
+};
+
+const MEMORIES_IMAGES = {
+    gism:     [],
+    colombo:  [],
+    usj:      []
 };
 
 let currentUrls = [];
@@ -454,19 +459,19 @@ function toggleFeedback(headerEl) {
     if (icon) icon.classList.toggle("collapsed");
 }
 
-function loadAllFeedbacks() {
-    Object.entries(FEEDBACK_IMAGES).forEach(([key, files]) => {
-        const grid = document.querySelector(`[data-feedback-key="feedbacks-${key}"]`);
+function loadImageGallery(config, attrPrefix) {
+    Object.entries(config).forEach(([key, files]) => {
+        const grid = document.querySelector(`[data-feedback-key="${attrPrefix}-${key}"]`);
         if (!grid) return;
         grid.innerHTML = "";
         if (files.length === 0) return;
-        const urls = files.map(f => `assets/feedbacks/${key}/${f}`);
+        const urls = files.map(f => `assets/${attrPrefix}s/${key}/${f}`);
         urls.forEach((url, i) => {
             const item = document.createElement("div");
             item.className = "feedback-item";
             const img = document.createElement("img");
             img.src = url;
-            img.alt = `Feedback ${i + 1}`;
+            img.alt = `${i + 1}`;
             img.loading = "lazy";
             img.addEventListener("click", () => openLightbox(urls, i));
             item.appendChild(img);
@@ -486,7 +491,7 @@ function openLightbox(urls, index) {
         lb.innerHTML = `
             <span class="feedback-lightbox-close">&times;</span>
             <button class="feedback-lightbox-nav feedback-lightbox-prev"><i class="fas fa-chevron-left"></i></button>
-            <img src="" alt="Feedback screenshot">
+            <img src="" alt="Photo">
             <button class="feedback-lightbox-nav feedback-lightbox-next"><i class="fas fa-chevron-right"></i></button>
         `;
         document.body.appendChild(lb);
@@ -511,4 +516,7 @@ function navigateLightbox(direction) {
     document.querySelector("#feedback-lightbox img").src = currentUrls[currentLightboxIndex];
 }
 
-document.addEventListener("DOMContentLoaded", loadAllFeedbacks);
+document.addEventListener("DOMContentLoaded", () => {
+    loadImageGallery(FEEDBACK_IMAGES, "feedbacks");
+    loadImageGallery(MEMORIES_IMAGES, "memories");
+});
