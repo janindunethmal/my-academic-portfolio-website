@@ -465,7 +465,7 @@ function loadImageGallery(config, attrPrefix) {
         if (!grid) return;
         grid.innerHTML = "";
         if (files.length === 0) return;
-        const urls = files.map(f => `assets/${attrPrefix}s/${key}/${f}`);
+        const urls = files.map(f => `assets/${attrPrefix}/${key}/${f}`);
         urls.forEach((url, i) => {
             const item = document.createElement("div");
             item.className = "feedback-item";
