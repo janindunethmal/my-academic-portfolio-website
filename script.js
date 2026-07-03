@@ -431,3 +431,168 @@ document.querySelectorAll(".research-card, .teaching-card, .reference-card, .sta
         card.style.setProperty("--mouse-y", `${y}px`);
     });
 });
+
+// ----------------------------------------------------
+// 13. Student Feedback Upload System (localStorage)
+// ----------------------------------------------------
+const FEEDBACK_KEYS = ["feedbacks-gism", "feedbacks-colombo", "feedbacks-usj"];
+
+function toggleFeedback(headerEl) {
+    const content = headerEl.nextElementSibling;
+    const icon = headerEl.querySelector(".feedback-toggle-icon");
+    content.classList.toggle("hidden");
+    if (icon) icon.classList.toggle("collapsed");
+}
+
+function loadAllFeedbacks() {
+    FEEDBACK_KEYS.forEach(key => loadFeedbacks(key));
+}
+
+function loadFeedbacks(key) {
+    const grid = document.querySelector(`[data-feedback-key="${key}"]`);
+    if (!grid) return;
+    const saved = JSON.parse(localStorage.getItem(key) || "[]");
+    grid.innerHTML = "";
+    if (saved.length === 0) return;
+    saved.forEach((src, index) => {
+        const item = document.createElement("div");
+        item.className = "feedback-item";
+        const img = document.createElement("img");
+        img.src = src;
+        img.alt = `Feedback ${index + 1}`;
+        img.loading = "lazy";
+        img.addEventListener("click", () => openFeedbackLightbox(key, index));
+        const del = document.createElement("button");
+        del.className = "feedback-delete-btn";
+        del.innerHTML = "&times;";
+        del.title = "Delete this feedback";
+        del.addEventListener("click", e => {
+            e.stopPropagation();
+            deleteFeedback(key, index);
+        });
+        item.appendChild(img);
+        item.appendChild(del);
+        grid.appendChild(item);
+    });
+}
+
+function handleFeedbackUpload(key, files) {
+    const filesArr = Array.from(files);
+    processNextFile(key, filesArr, 0);
+}
+
+function processNextFile(key, files, index) {
+    if (index >= files.length) return;
+    const file = files[index];
+    if (!file.type.startsWith("image/")) {
+        processNextFile(key, files, index + 1);
+        return;
+    }
+    const reader = new FileReader();
+    reader.onload = function (e) {
+        compressImage(e.target.result, 0.6, compressedDataUrl => {
+            const saved = JSON.parse(localStorage.getItem(key) || "[]");
+            saved.push(compressedDataUrl);
+            try {
+                localStorage.setItem(key, JSON.stringify(saved));
+            } catch (err) {
+                alert("Storage full! Try deleting some existing feedback images first.");
+                return;
+            }
+            loadFeedbacks(key);
+            processNextFile(key, files, index + 1);
+        });
+    };
+    reader.readAsDataURL(file);
+}
+
+function compressImage(dataUrl, quality, callback) {
+    const img = new Image();
+    img.onload = function () {
+        const canvas = document.createElement("canvas");
+        let w = img.width;
+        let h = img.height;
+        const maxDim = 1200;
+        if (w > maxDim || h > maxDim) {
+            const ratio = Math.min(maxDim / w, maxDim / h);
+            w *= ratio;
+            h *= ratio;
+        }
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0, w, h);
+        callback(canvas.toDataURL("image/jpeg", quality));
+    };
+    img.src = dataUrl;
+}
+
+function deleteFeedback(key, index) {
+    const saved = JSON.parse(localStorage.getItem(key) || "[]");
+    saved.splice(index, 1);
+    localStorage.setItem(key, JSON.stringify(saved));
+    loadFeedbacks(key);
+}
+
+// Lightbox state
+let currentLightboxKey = null;
+let currentLightboxIndex = 0;
+
+function openFeedbackLightbox(key, index) {
+    currentLightboxKey = key;
+    currentLightboxIndex = index;
+    const saved = JSON.parse(localStorage.getItem(key) || "[]");
+    if (saved.length === 0) return;
+    let lightbox = document.getElementById("feedback-lightbox");
+    if (!lightbox) {
+        lightbox = document.createElement("div");
+        lightbox.id = "feedback-lightbox";
+        lightbox.className = "feedback-lightbox";
+        lightbox.innerHTML = `
+            <span class="feedback-lightbox-close">&times;</span>
+            <button class="feedback-lightbox-nav feedback-lightbox-prev"><i class="fas fa-chevron-left"></i></button>
+            <img src="" alt="Feedback screenshot">
+            <button class="feedback-lightbox-nav feedback-lightbox-next"><i class="fas fa-chevron-right"></i></button>
+        `;
+        document.body.appendChild(lightbox);
+
+        lightbox.querySelector(".feedback-lightbox-close").addEventListener("click", () => {
+            lightbox.classList.remove("active");
+        });
+        lightbox.addEventListener("click", e => {
+            if (e.target === lightbox) lightbox.classList.remove("active");
+        });
+        document.addEventListener("keydown", e => {
+            if (!lightbox.classList.contains("active")) return;
+            if (e.key === "Escape") lightbox.classList.remove("active");
+            if (e.key === "ArrowLeft") navigateLightbox(-1);
+            if (e.key === "ArrowRight") navigateLightbox(1);
+        });
+        lightbox.querySelector(".feedback-lightbox-prev").addEventListener("click", () => navigateLightbox(-1));
+        lightbox.querySelector(".feedback-lightbox-next").addEventListener("click", () => navigateLightbox(1));
+    }
+    lightbox.querySelector("img").src = saved[index];
+    lightbox.classList.add("active");
+}
+
+function navigateLightbox(direction) {
+    const saved = JSON.parse(localStorage.getItem(currentLightboxKey) || "[]");
+    currentLightboxIndex = (currentLightboxIndex + direction + saved.length) % saved.length;
+    document.querySelector("#feedback-lightbox img").src = saved[currentLightboxIndex];
+}
+
+// Bind file inputs
+document.addEventListener("DOMContentLoaded", () => {
+    loadAllFeedbacks();
+    FEEDBACK_KEYS.forEach(key => {
+        const input = document.getElementById(`feedback-input-${key.replace("feedbacks-", "")}`);
+        if (input) {
+            input.addEventListener("change", e => {
+                if (e.target.files.length > 0) {
+                    handleFeedbackUpload(key, e.target.files);
+                    e.target.value = "";
+                }
+            });
+        }
+    });
+});
